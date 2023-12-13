@@ -1,5 +1,9 @@
 using LinearAlgebra
 using QuadGK
+using Math
+using ForwardDiff
+
+const G = 6.67430e-11
 
 function f(x)
     return x * x
@@ -19,15 +23,19 @@ function integral_on_a_b(fun, a, b)
     println("Wagi: ", weights')
 
     global result = 0.0
-    global a = -1
-    global b = 2
-
     for i in 1:length(nodes)
         # Replace the following line with your function evaluation at nodes[i]
-        global result = result + f((a+b)/2 + ((b-a) * nodes[i]) / 2) * weights[i]
+        global result = result + fun((a+b)/2 + ((b-a) * nodes[i]) / 2) * weights[i]
     end
 
-    println("Wynik: ", ((b-a)/2) * result)
-    return result
+    return ((b-a)/2) * result
+end
+
+function L(v)
+    return 4 * pi * G * integral_on_a_b(v, 1, 2);
+end
+
+function B(w, v)
+    return -1 * integral_on_a_b(ForwardDiff.derivative(w) * ForwardDiff.derivative(v), 0, 3);
 end
 
