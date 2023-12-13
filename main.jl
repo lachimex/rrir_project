@@ -9,18 +9,12 @@ function f(x)
     return x * x
 end
 
-function gauss_legendre_quadrature(degree)
-    nodes, weights = gauss(Float64, degree)
-    return nodes, weights
-end
-
 function integral_on_a_b(fun, a, b)
-    degree = 10  # Stopień kwadratury Gaussa-Legendre'a
-    nodes, weights = gauss_legendre_quadrature(degree)
+    degree = 10
+    nodes, weights = gauss(Float64, degree)
 
     global result = 0.0
     for i in 1:length(nodes)
-        # Replace the following line with your function evaluation at nodes[i]
         global result = result + fun((a+b)/2 + ((b-a) * nodes[i]) / 2) * weights[i]
     end
 
@@ -28,8 +22,8 @@ function integral_on_a_b(fun, a, b)
 end
 
 function integral_on_a_b_v2(fun1, fun2, a, b)
-    degree = 10  # Stopień kwadratury Gaussa-Legendre'a
-    nodes, weights = gauss_legendre_quadrature(degree)
+    degree = 10
+    nodes, weights = gauss(Float64, degree)
 
     global result = 0.0
     for i in 1:length(nodes)
