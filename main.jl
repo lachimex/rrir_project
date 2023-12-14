@@ -5,42 +5,12 @@ using Plots
 
 const G = 6.67430e-11
 
-function f(x)
-    return x * x
-end
-
 function ro(x)
     if (1 < x && x <= 2)
         return 1
     else
         return 0
     end
-end
-
-function integral_on_a_b(fun, a, b)
-    degree = 10
-    nodes, weights = gauss(Float64, degree)
-
-    global result = 0.0
-    for i in 1:length(nodes)
-        x = (a+b)/2 + ((b-a) * nodes[i]) / 2
-        global result = result + ro(x) * fun(x) * weights[i]
-    end
-
-    return ((b-a)/2) * result
-end
-
-function integral_on_a_b_v2(fun1, fun2, a, b)
-    degree = 10
-    nodes, weights = gauss(Float64, degree)
-
-    global result = 0.0
-    for i in 1:length(nodes)
-        x = (a+b)/2 + ((b-a) * nodes[i]) / 2
-        global result = result + ForwardDiff.derivative(fun1, x) * ForwardDiff.derivative(fun2, x) * weights[i]
-    end
-
-    return ((b-a)/2) * result
 end
 
 function L(v)
@@ -55,11 +25,7 @@ function B(w, v)
     return -1 * result;
 end
 
-function f1(x)
-    return x
-end
-
-function e_i_odd(n, i)
+function e_i_v1(n, i)
     dx = 3 / n
     x_1 = dx * div(i-1, 3)
     x_2 = x_1 + dx
@@ -75,7 +41,7 @@ function e_i_odd(n, i)
     end
 end
 
-function e_i_even(n, i)
+function e_i_v2(n, i)
     dx = 3 / n
     x_1 = dx * div(i-1, 3)
     x_2 = x_1 + dx
@@ -111,9 +77,9 @@ E = Array{Function}(undef, 1, 3*n)
 
 for i in 1:3*n
     if i % 3 == 0
-        e_i = e_i_even(n, i)
+        e_i = e_i_v1(n, i)
     elseif i % 3 == 1
-        e_i = e_i_odd(n, i)
+        e_i = e_i_v2(n, i)
     else
         e_i = e_quadratic(n, i)
     end
