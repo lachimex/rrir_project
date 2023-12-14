@@ -77,6 +77,7 @@ end
 
 A = zeros(Float64, 2*n, 2*n)
 C = zeros(Float64, 2*n, 1)
+E = Array{Function}(undef, 1, 2*n)
 
 for i in 1:2*n
     if i % 2 == 0
@@ -84,6 +85,7 @@ for i in 1:2*n
     else
         e_i = e_i_odd(n, i)
     end
+    E[i] = e_i
     for j in 1:2*n
         if j % 2 == 0
             e_j = e_i_even(n, j)
