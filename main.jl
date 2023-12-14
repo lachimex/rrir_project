@@ -3,7 +3,6 @@ using QuadGK
 using ForwardDiff
 
 const G = 6.67430e-11
-const h = 1e-8
 
 function f(x)
     return x * x
@@ -44,14 +43,14 @@ function integral_on_a_b_v2(fun1, fun2, a, b)
 end
 
 function L(v)
-    return integral_on_a_b(v, 0, 3);
+    return 4 * pi * G * integral_on_a_b(v, 0, 3);
 end
 
 function B(w, v)
     return -1 * integral_on_a_b_v2(w, v, 0, 3);
 end
 
-n = 2
+n = 3
 
 function e_i_odd(n, i)
     dx = 3 / n
@@ -59,6 +58,7 @@ function e_i_odd(n, i)
     x_2 = x_1 + dx
     a = 1/(x_1 - x_2)
     b = 1 - x_1/(x_1 - x_2)
+    println("e$i $a x + $b")
     return function (x)
         a * x + b
     end
@@ -70,6 +70,7 @@ function e_i_even(n, i)
     x_2 = x_1 + dx
     a = 1/(x_2 - x_1)
     b = 1 - x_2/(x_2 - x_1)
+    println("e$i $a x + $b")
     return function (x)
         a * x + b
     end
@@ -86,15 +87,13 @@ for i in 1:2*n
         e_i = e_i_odd(n, i)
     end
     E[i] = e_i
+end
+
+for i in 1:2*n
     for j in 1:2*n
-        if j % 2 == 0
-            e_j = e_i_even(n, j)
-        else
-            e_j = e_i_odd(n, j)
-        end
-        A[i, j] = B(e_i, e_j)
+        A[i, j] = B(E[i], E[j])
     end
-    C[i] = L(e_i)
+    C[i] = L(E[i])
 end
 
 println(C \ A)
