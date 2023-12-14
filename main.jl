@@ -1,6 +1,7 @@
 using LinearAlgebra
 using QuadGK
 using ForwardDiff
+using Plots
 
 const G = 6.67430e-11
 
@@ -17,7 +18,7 @@ function ro(x)
 end
 
 function integral_on_a_b(fun, a, b)
-    degree = 50
+    degree = 10
     nodes, weights = gauss(Float64, degree)
 
     global result = 0.0
@@ -30,7 +31,7 @@ function integral_on_a_b(fun, a, b)
 end
 
 function integral_on_a_b_v2(fun1, fun2, a, b)
-    degree = 50
+    degree = 10
     nodes, weights = gauss(Float64, degree)
 
     global result = 0.0
@@ -43,57 +44,113 @@ function integral_on_a_b_v2(fun1, fun2, a, b)
 end
 
 function L(v)
-    return 4 * pi * G * integral_on_a_b(v, 0, 3);
+    degree = 5
+    result, error = quadgk(x -> v(x) * ro(x), 0, 3)
+    return 4 * pi * G * result;
 end
 
 function B(w, v)
-    return -1 * integral_on_a_b_v2(w, v, 0, 3);
+    degree = 5
+    result, error = quadgk(x -> ForwardDiff.derivative(w, x) * ForwardDiff.derivative(v, x), 0, 3)
+    return -1 * result;
 end
 
-n = 3
+function f1(x)
+    return x
+end
 
 function e_i_odd(n, i)
     dx = 3 / n
-    x_1 = dx * div(i, 2)
+    x_1 = dx * div(i-1, 3)
     x_2 = x_1 + dx
     a = 1/(x_1 - x_2)
     b = 1 - x_1/(x_1 - x_2)
-    println("e$i $a x + $b")
+    # println("e$i $a x + $b dla przedzialu ($x_1, $x_2)")
     return function (x)
-        a * x + b
+        if x_1 <= x <= x_2
+            return a * x + b
+        else
+            return 0
+        end
     end
 end
 
 function e_i_even(n, i)
     dx = 3 / n
-    x_1 = dx * div(i, 2)
+    x_1 = dx * div(i-1, 3)
     x_2 = x_1 + dx
     a = 1/(x_2 - x_1)
     b = 1 - x_2/(x_2 - x_1)
-    println("e$i $a x + $b")
+    # println("e$i $a x + $b dla przedzialu ($x_1, $x_2)")
     return function (x)
-        a * x + b
+        if x_1 <= x <= x_2
+            return a * x + b
+        else
+            return 0
+        end
     end
 end
 
-A = zeros(Float64, 2*n, 2*n)
-C = zeros(Float64, 2*n, 1)
-E = Array{Function}(undef, 1, 2*n)
+function e_quadratic(n, i)
+    dx = 3 / n
+    x_1 = dx * div(i-1, 3)
+    x_2 = x_1 + dx
+    return function (x)
+        if x_1 <= x <= x_2
+            return -1 * (x-x_1) * (x-x_2)
+        else
+            return 0
+        end
+    end
+end
 
-for i in 1:2*n
-    if i % 2 == 0
+n = 3
+A = zeros(Float64, 3*n, 3*n)
+C = zeros(Float64, 3*n, 1)
+E = Array{Function}(undef, 1, 3*n)
+
+for i in 1:3*n
+    if i % 3 == 0
         e_i = e_i_even(n, i)
-    else
+    elseif i % 3 == 1
         e_i = e_i_odd(n, i)
+    else
+        e_i = e_quadratic(n, i)
     end
     E[i] = e_i
 end
 
-for i in 1:2*n
-    for j in 1:2*n
+for i in 1:3*n
+    for j in i:3*n
         A[i, j] = B(E[i], E[j])
     end
     C[i] = L(E[i])
 end
 
-println(C \ A)
+println()
+for i in 1:size(C, 1)
+    println(C[i, :])
+end
+
+println()
+A = 0.5 * (A + A')
+for i in 1:size(A, 1)
+    println(A[i, :])
+end
+println()
+
+W = C \ A
+println(W)
+
+function u(x)
+    out = 5 - x/3
+    for i in 1:3*n
+        out += W[i] * E[i](x)
+    end
+    return out
+end
+
+x = range(1, 2, length=1000)
+y = u.(x)
+gui(plot(x, y))
+sleep(1000000)
