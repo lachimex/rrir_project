@@ -14,13 +14,11 @@ function ro(x)
 end
 
 function L(v)
-    degree = 5
     result, error = quadgk(x -> v(x) * ro(x), 0, 3)
     return 4 * pi * G * result;
 end
 
 function B(w, v)
-    degree = 5
     result, error = quadgk(x -> ForwardDiff.derivative(w, x) * ForwardDiff.derivative(v, x), 0, 3)
     return -1 * result;
 end
@@ -70,15 +68,15 @@ function e_quadratic(n, i)
     end
 end
 
-n = 3
+n = 10
 A = zeros(Float64, 3*n, 3*n)
 C = zeros(Float64, 3*n, 1)
 E = Array{Function}(undef, 1, 3*n)
 
 for i in 1:3*n
-    if i % 3 == 0
+    if i % 3 == 1
         e_i = e_i_v1(n, i)
-    elseif i % 3 == 1
+    elseif i % 3 == 2
         e_i = e_i_v2(n, i)
     else
         e_i = e_quadratic(n, i)
@@ -89,6 +87,7 @@ end
 for i in 1:3*n
     for j in i:3*n
         A[i, j] = B(E[i], E[j])
+        A[j, i] = A[i, j]
     end
     C[i] = L(E[i])
 end
@@ -99,7 +98,6 @@ for i in 1:size(C, 1)
 end
 
 println()
-A = 0.5 * (A + A')
 for i in 1:size(A, 1)
     println(A[i, :])
 end
