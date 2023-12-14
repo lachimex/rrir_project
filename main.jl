@@ -68,7 +68,7 @@ function e_quadratic(n, i)
     end
 end
 
-n = 10
+n = 3
 A = zeros(Float64, 3*n, 3*n)
 C = zeros(Float64, 3*n, 1)
 E = Array{Function}(undef, 1, 3*n)
@@ -106,15 +106,23 @@ println()
 W = C \ A
 println(W)
 
-function u(x)
-    out = 5 - x/3
+function w(x)
+    out = 0.0
     for i in 1:3*n
         out += W[i] * E[i](x)
     end
     return out
 end
 
-x = range(1, 2, length=1000)
+function u(x)
+    out = 5 - x/3
+    out += w(x)
+    return out
+end
+
+println(w(0))
+println(w(3))
+x = range(0, 3, length=1000)
 y = u.(x)
 gui(plot(x, y))
 sleep(1000000)
