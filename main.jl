@@ -18,14 +18,14 @@ function L(v)
     return 4 * pi * G * result;
 end
 
-function B(w, v)
-    result, error = quadgk(x -> ForwardDiff.derivative(w, x) * ForwardDiff.derivative(v, x), 0, 3)
-    return -1 * result;
+function B(dw_dx, dv_dx)
+    result, error = quadgk(x -> dw_dx(x) * dv_dx(x), 0, 3)
+    return -1 * result
 end
 
 function e_i_v1(n, i)
     dx = 3 / n
-    x_1 = dx * div(i-1, 3)
+    x_1 = dx * div(i-1, 2)
     x_2 = x_1 + dx
     a = 1/(x_1 - x_2)
     b = 1 - x_1/(x_1 - x_2)
@@ -41,7 +41,7 @@ end
 
 function e_i_v2(n, i)
     dx = 3 / n
-    x_1 = dx * div(i-1, 3)
+    x_1 = dx * div(i-1, 2)
     x_2 = x_1 + dx
     a = 1/(x_2 - x_1)
     b = 1 - x_2/(x_2 - x_1)
@@ -55,39 +55,43 @@ function e_i_v2(n, i)
     end
 end
 
-function e_quadratic(n, i)
+function de_dx(n, i)
     dx = 3 / n
-    x_1 = dx * div(i-1, 3)
+    x_1 = dx * div(i-1, 2)
     x_2 = x_1 + dx
+    a = 1/(x_2 - x_1)
     return function (x)
         if x_1 <= x <= x_2
-            return -1 * (x-x_1) * (x-x_2)
+            return a
         else
             return 0
         end
     end
 end
+    
 
-n = 3
-A = zeros(Float64, 3*n, 3*n)
-C = zeros(Float64, 3*n, 1)
-E = Array{Function}(undef, 1, 3*n)
+n = 7
+A = zeros(Float64, 2*n, 2*n)
+C = zeros(Float64, 2*n, 1)
+D = Array{Function}(undef, 1, 2*n)
+E = Array{Function}(undef, 1, 2*n)
 
-for i in 1:3*n
-    if i % 3 == 1
+for i in 1:2*n
+    if i % 2 == 0
         e_i = e_i_v1(n, i)
-    elseif i % 3 == 2
-        e_i = e_i_v2(n, i)
     else
-        e_i = e_quadratic(n, i)
+        e_i = e_i_v2(n, i)
     end
     E[i] = e_i
+    D[i] = de_dx(n, i)
 end
 
-for i in 1:3*n
-    for j in i:3*n
-        A[i, j] = B(E[i], E[j])
-        A[j, i] = A[i, j]
+for i in 1:2*n
+    for j in i:2*n
+        if (j - i) < 2
+            A[i, j] = B(D[i], D[j])
+            A[j, i] = A[i, j]
+        end
     end
     C[i] = L(E[i])
 end
@@ -108,7 +112,7 @@ println(W)
 
 function w(x)
     out = 0.0
-    for i in 1:3*n
+    for i in 1:2*n
         out += W[i] * E[i](x)
     end
     return out
@@ -120,9 +124,7 @@ function u(x)
     return out
 end
 
-println(w(0))
-println(w(3))
-x = range(0, 3, length=1000)
+x = range(0.75, 2.25, length=1000)
 y = u.(x)
 gui(plot(x, y))
 sleep(1000000)
