@@ -14,7 +14,7 @@ end
 
 function L(v, x_1, x_2)
     result, error = quadgk(x -> v(x) * ro(x), x_1, x_2)
-    return 4 * pi * result;
+    return 4 * pi * G * result;
 end
 
 function B(dw_dx, dv_dx, x_1, x_2)
@@ -26,12 +26,9 @@ function e_i_v1(n, i)
     dx = 3 / n
     x_1 = dx * div(i-1, 2)
     x_2 = x_1 + dx
-    a = 1/(x_1 - x_2)
-    b = 1 - x_1/(x_1 - x_2)
-    # println("e$i $a x + $b dla przedzialu ($x_1, $x_2)")
     function f(x)
         if x_1 <= x <= x_2
-            return a * x + b
+            return x / n - i + 1
         else
             return 0
         end
@@ -43,12 +40,9 @@ function e_i_v2(n, i)
     dx = 3 / n
     x_1 = dx * div(i-1, 2)
     x_2 = x_1 + dx
-    a = 1/(x_2 - x_1)
-    b = 1 - x_2/(x_2 - x_1)
-    # println("e$i $a x + $b dla przedzialu ($x_1, $x_2)")
     function f(x)
         if x_1 <= x <= x_2
-            return a * x + b
+            return -x / n + + 1
         else
             return 0
         end
@@ -61,9 +55,9 @@ function de_dx(n, i)
     x_1 = dx * div(i-1, 2)
     x_2 = x_1 + dx
     if i % 2 == 1
-        a = 1/(x_2 - x_1)
+        a = 1/n
     else
-        a = 1/(x_1 - x_2)
+        a = -1/n
     end
     function f(x)
         if x_1 <= x <= x_2
@@ -76,7 +70,7 @@ function de_dx(n, i)
 end
     
 
-n = 11
+n = 15
 A = zeros(Float64, 2*n, 2*n)
 C = zeros(Float64, 2*n, 1)
 D = Array{Function}(undef, 2*n, 1) #array of derivatives
@@ -136,7 +130,7 @@ function u(x)
     return out
 end
 
-x = range(1, 2, length=1000)
+x = range(0, 3, length=1000)
 y = u.(x)
 gui(plot(x, y))
-sleep(1000000)
+sleep(100)
