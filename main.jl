@@ -70,7 +70,7 @@ function de_dx(n, i)
 end
     
 
-n = 15
+n = 50
 A = zeros(Float64, 2*n, 2*n)
 C = zeros(Float64, 2*n, 1)
 D = Array{Function}(undef, 2*n, 1) #array of derivatives
@@ -100,21 +100,7 @@ for i in 1:2*n
     C[i] = L(E[i], D2[i, 1], D2[i, 2])
 end
 
-
-println()
-for i in 1:size(A, 1)
-    println(A[i, :])
-end
-println()
-for i in 1:size(C, 1)
-    println(C[i, :])
-end
-println()
-
-W = pinv(A) * C
-for i in 1:size(W, 1)
-    println(W[i, :])
-end
+W = inv(A) * C
 
 function w(x)
     out = 0.0
@@ -125,7 +111,7 @@ function w(x)
 end
 
 function u(x)
-    out = 5 - x/3
+    out = 0
     out += w(x)
     return out
 end
