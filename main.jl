@@ -2,7 +2,7 @@ using LinearAlgebra
 using QuadGK
 using Plots
 
-const G = 6.67430e-11
+const G = 1
 
 function ro(x)
     if (1 < x && x <= 2)
@@ -17,9 +17,9 @@ function L(v, x_1, x_2)
     return 4 * pi * G * result;
 end
 
-function B(dw_dx, dv_dx, x_1, x_2)
+function B(dw_dx, dv_dx, v, x_1, x_2)
     result, error = quadgk(x -> dw_dx(x) * dv_dx(x), x_1, x_2)
-    return - result
+    return dw_dx(3) * v(3) - dw_dx(0) * v(0) - result
 end
 
 function e_i_v1(n, i)
@@ -42,7 +42,7 @@ function e_i_v2(n, i)
     x_2 = x_1 + dx
     function f(x)
         if x_1 <= x <= x_2
-            return -x / n + + 1
+            return -x / n + i + 1
         else
             return 0
         end
@@ -93,7 +93,7 @@ end
 for i in 1:2*n
     for j in i:2*n
         if (j - i) < 2
-            A[i, j] = B(D[i], D[j], D2[i, 1], D2[i, 2])
+            A[i, j] = B(D[i], D[j], E[i], D2[i, 1], D2[i, 2])
             A[j, i] = A[i, j]
         end
     end
