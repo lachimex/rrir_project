@@ -2,7 +2,7 @@ using LinearAlgebra
 using QuadGK
 using Plots
 
-const G = 1
+const G = 6.67430e-11
 
 function ro(x)
     if (1 < x && x <= 2)
