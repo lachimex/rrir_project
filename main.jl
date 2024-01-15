@@ -19,7 +19,7 @@ end
 
 function B(dw_dx, dv_dx, x_1, x_2)
     result, error = quadgk(x -> dw_dx(x) * dv_dx(x), x_1, x_2)
-    return -1 * result
+    return - result
 end
 
 function e_i_v1(n, i)
@@ -100,7 +100,8 @@ for i in 1:2*n
     C[i] = L(E[i], D2[i, 1], D2[i, 2])
 end
 
-W = inv(A) * C
+W = pinv(A) * C
+println(W)
 
 function w(x)
     out = 0.0
@@ -111,7 +112,7 @@ function w(x)
 end
 
 function u(x)
-    out = 0
+    out = 5-x/3
     out += w(x)
     return out
 end
